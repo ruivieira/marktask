@@ -2,6 +2,13 @@
 name = "marktask"
 version = "0.1.0"
 edition = "2021"
+authors = ["Rui Vieira <ruidevieira@googlemail.com>"]
+license = "Apache-2.0"
+description = "A CLI tool for parsing and manipulating Markdown tasks."
+repository = "https://github.com/ruivieira/marktask"
+readme = "README.md"
+keywords = ["cli", "markdown", "tasks", "todo"]
+categories = ["command-line-utilities", "text-processing"]
 
 
 [lib]
