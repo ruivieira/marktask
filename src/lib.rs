@@ -1,7 +1,7 @@
 
 use regex::Regex;
 use serde::{Serialize};
-use chrono::NaiveDate;
+use chrono::{NaiveDate, Local};
 
 mod serializers {
     use chrono::NaiveDate;
@@ -51,6 +51,44 @@ mod serializers {
     }
 }
 
+pub trait Filter {
+    fn apply<'a>(&self, tasks: Vec<&'a Task>) -> Vec<&'a Task>;
+}
+
+
+
+pub struct OverdueFilter {
+    pub show_overdue: bool,
+}
+
+impl Filter for OverdueFilter {
+    fn apply<'a>(&self, tasks: Vec<&'a Task>) -> Vec<&'a Task> {
+        if self.show_overdue {
+            tasks // Directly return the tasks if filtering is not needed
+        } else {
+            tasks.into_iter().filter(|&task| !task.overdue).collect()
+        }
+    }
+}
+
+pub struct FilterPipeline {
+    pub filters: Vec<Box<dyn Filter>>,
+}
+
+impl FilterPipeline {
+    pub fn new() -> Self {
+        FilterPipeline { filters: Vec::new() }
+    }
+
+    pub fn add_filter(&mut self, filter: Box<dyn Filter>) {
+        self.filters.push(filter);
+    }
+
+    pub fn apply<'a>(&self, tasks: Vec<&'a Task>) -> Vec<&'a Task> {
+        self.filters.iter().fold(tasks, |acc, filter| filter.apply(acc))
+    }
+}
+
 
 #[derive(Serialize)]
 pub struct Task {
@@ -62,7 +100,7 @@ pub struct Task {
     pub scheduled: Option<NaiveDate>,
     #[serde(serialize_with = "serializers::serialize", deserialize_with = "serializers::deserialize", skip_serializing_if = "Option::is_none")]
     pub start: Option<NaiveDate>,
-
+    pub overdue: bool,
 }
 
 /// Parses the input text into a vector of `Task` objects.
@@ -87,7 +125,9 @@ pub fn parse_input(input: &str) -> Vec<Task> {
             // Clean the task name by removing date strings
             name_with_potential_dates = remove_date_strings(&[&due_date_regex, &scheduled_date_regex, &start_date_regex], name_with_potential_dates);
 
-            Task { name: name_with_potential_dates.trim().to_string(), completed, due, scheduled, start }
+            let overdue = due.map_or(false, |due_date| due_date < Local::today().naive_local());
+
+            Task { name: name_with_potential_dates.trim().to_string(), completed, due, scheduled, start, overdue }
         })
     }).collect()
 }

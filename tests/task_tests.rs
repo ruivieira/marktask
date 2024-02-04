@@ -1,8 +1,8 @@
 use std::fs;
 use std::path::PathBuf;
-use marktask::parse_input;
+use marktask::{FilterPipeline, OverdueFilter, parse_input};
 use marktask::Task;
-use chrono::NaiveDate;
+use chrono::{NaiveDate, Local, Duration};
 
 #[test]
 fn test_task_completion() {
@@ -82,5 +82,84 @@ fn test_tasks_details() {
         assert_eq!(task.scheduled, expected_scheduled, "Task scheduled date does not match expected value");
         assert_eq!(task.start, expected_start, "Task start date does not match expected value");
     }
+}
+
+#[test]
+fn test_overdue_tasks() {
+    // Generate dynamic dates for the tasks
+    let today = Local::today().naive_local();
+    let yesterday = today - Duration::days(1);
+    let tomorrow = today + Duration::days(1);
+
+    // Task strings with dynamic dates
+    let input = format!(
+        "- [ ] Task due today 📅 {}\n\
+             - [ ] Overdue task 📅 {}\n\
+             - [ ] Not overdue task 📅 {}",
+        today, yesterday, tomorrow
+    );
+
+    // Parse the input string to tasks
+    let tasks = parse_input(&input);
+
+    // Expected overdue statuses
+    let expected_overdue = vec![
+        false, // Task due today is not considered overdue
+        true,  // Task due yesterday is overdue
+        false, // Task due tomorrow is not overdue
+    ];
+
+    // Compare each task's overdue status with the expected status
+    assert_eq!(tasks.len(), expected_overdue.len(), "Number of tasks parsed does not match expected number");
+    for (task, &expected) in tasks.iter().zip(expected_overdue.iter()) {
+        assert_eq!(task.overdue, expected, "Task overdue status does not match expected value");
+    }
+}
+
+#[test]
+fn test_overdue_filter_pipeline() {
+    // Create a date for today and a date in the past
+    let today = Local::today().naive_local();
+    let past_date = Local::today().naive_local() - chrono::Duration::days(1);
+
+    // Create sample tasks
+    let tasks = vec![
+        Task {
+            name: "Task due today".to_string(),
+            completed: false,
+            due: Some(today),
+            overdue: false,
+            start: None,
+            scheduled: None
+        },
+        Task {
+            name: "Overdue task".to_string(),
+            completed: false,
+            due: Some(past_date),
+            overdue: true,
+            start: None,
+            scheduled: None
+        },
+        Task {
+            name: "No due date task".to_string(),
+            completed: false,
+            due: None,
+            overdue: false,
+            start: None,
+            scheduled: None
+        },
+    ];
+
+    // Initialize the filter pipeline and add the OverdueFilter
+    let mut pipeline = FilterPipeline::new();
+    pipeline.add_filter(Box::new(OverdueFilter { show_overdue: false }));
+
+    // Apply the pipeline filters
+    let task_refs: Vec<&Task> = tasks.iter().collect();
+    let filtered_tasks = pipeline.apply(task_refs);
+
+    // Assert that the filtered tasks do not include the overdue task
+    assert_eq!(filtered_tasks.len(), 2, "Filtered tasks should not include overdue tasks");
+    assert!(filtered_tasks.iter().all(|&task| !task.overdue), "All filtered tasks should not be overdue");
 }
 
