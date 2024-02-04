@@ -1,0 +1,4 @@
+- [ ] This a task with no due data
+   - [ ] This is another one, but with a due date 📅 2025-07-14
+   - [ ] This one is overdue 📅 2021-07-14
+- [ ] This one has an invalid due date 📅 9999-12-99
