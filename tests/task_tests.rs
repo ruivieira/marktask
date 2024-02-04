@@ -57,26 +57,30 @@ fn test_tasks_details() {
     let tasks = parse_input(&input);
 
     let expected_details = vec![
-        ("This a task with no due data", None, None),
-        ("This is another one, but with a due date", Some(NaiveDate::from_ymd(2025, 7, 14)), None),
-        ("This one is overdue", Some(NaiveDate::from_ymd(2021, 7, 14)), None),
-        ("This one has an invalid due date", None, None),
-        ("This has both a due and scheduled date", Some(NaiveDate::from_ymd(2025, 7, 14)), Some(NaiveDate::from_ymd(2025, 7, 14))),
-        ("This has a wrong scheduled date", Some(NaiveDate::from_ymd(2025, 7, 14)), None),
-        ("This has a both dates wrong", None, None),
-        ("This has just the due date wrong", None, Some(NaiveDate::from_ymd(2025, 7, 14))),
-        ("This one has just a scheduled date (but wrong)", None, None),
-        ("This one has just a scheduled date", None, Some(NaiveDate::from_ymd(2025, 7, 14))),
+        ("This a task with no due data", None, None, None),
+        ("This is another one, but with a due date", Some(NaiveDate::from_ymd(2025, 7, 14)), None, None),
+        ("This one is overdue", Some(NaiveDate::from_ymd(2021, 7, 14)), None, None),
+        ("This one has an invalid due date", None, None, None),
+        ("This has both a due and scheduled date", Some(NaiveDate::from_ymd(2025, 7, 14)), Some(NaiveDate::from_ymd(2025, 7, 14)), None),
+        ("This has a wrong scheduled date", Some(NaiveDate::from_ymd(2025, 7, 14)), None, None),
+        ("This has both dates wrong", None, None, None),
+        ("This has just the due date wrong", None, Some(NaiveDate::from_ymd(2025, 7, 14)), None),
+        ("This one has just a scheduled date (but wrong)", None, None, None),
+        ("This one has just a scheduled date", None, Some(NaiveDate::from_ymd(2025, 7, 14)), None),
+        ("To start", None, None, Some(NaiveDate::from_ymd(2024, 2, 7))),
+        ("Start and due", Some(NaiveDate::from_ymd(2025, 7, 14)), None, Some(NaiveDate::from_ymd(2024, 2, 7))),
+        ("Start and scheduled", None, Some(NaiveDate::from_ymd(2025, 7, 15)), Some(NaiveDate::from_ymd(2024, 2, 7))),
+        ("All dates present", Some(NaiveDate::from_ymd(2025, 7, 14)), Some(NaiveDate::from_ymd(2025, 7, 15)), Some(NaiveDate::from_ymd(2024, 2, 7))),
+        ("Start with invalid date", None, None, None),
     ];
 
-    // Assert the number of parsed tasks matches the expected number
     assert_eq!(tasks.len(), expected_details.len(), "Number of parsed tasks does not match expected number");
 
-    // Compare each task's name, due date, and scheduled date with the expected values
-    for (task, &(expected_name, expected_due, expected_scheduled)) in tasks.iter().zip(expected_details.iter()) {
+    for (task, &(expected_name, expected_due, expected_scheduled, expected_start)) in tasks.iter().zip(expected_details.iter()) {
         assert_eq!(task.name, expected_name, "Task name does not match expected value");
         assert_eq!(task.due, expected_due, "Task due date does not match expected value");
         assert_eq!(task.scheduled, expected_scheduled, "Task scheduled date does not match expected value");
+        assert_eq!(task.start, expected_start, "Task start date does not match expected value");
     }
 }
 
