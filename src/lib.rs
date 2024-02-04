@@ -1,6 +1,4 @@
-// lib.rs
-
-/// Represents a single task with a name and completion status.
+use regex::Regex;
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -11,13 +9,13 @@ pub struct Task {
 
 /// Parses the input text into a vector of `Task` objects.
 pub fn parse_input(input: &str) -> Vec<Task> {
-    input.lines().map(|line| {
-        // Determine if the task is completed based on the presence of "[x]" and extract the task name.
-        let completed = line.contains("[x]");
-        let name = line.trim_start_matches("- [ ] ")
-            .trim_start_matches("- [x] ")
-            .to_string();
+    let task_regex = Regex::new(r"^\s*-\s*\[(\s|x)]\s*(.*)").unwrap();
 
-        Task { name, completed }
+    input.lines().filter_map(|line| {
+        task_regex.captures(line).map(|caps| {
+            let completed = caps.get(1).map_or(false, |m| m.as_str() == "x");
+            let name = caps.get(2).map_or("", |m| m.as_str()).to_string();
+            Task { name, completed }
+        })
     }).collect()
 }
