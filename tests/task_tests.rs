@@ -1,6 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
-use marktask::{FilterPipeline, OverdueFilter, parse_input};
+use marktask::{FilterPipeline, OverdueFilter, parse_input, parse_priority, Priority};
 use marktask::Task;
 use chrono::{NaiveDate, Local, Duration};
 
@@ -130,7 +130,8 @@ fn test_overdue_filter_pipeline() {
             due: Some(today),
             overdue: false,
             start: None,
-            scheduled: None
+            scheduled: None,
+            priority: Priority::None
         },
         Task {
             name: "Overdue task".to_string(),
@@ -138,7 +139,8 @@ fn test_overdue_filter_pipeline() {
             due: Some(past_date),
             overdue: true,
             start: None,
-            scheduled: None
+            scheduled: None,
+            priority: Priority::None
         },
         Task {
             name: "No due date task".to_string(),
@@ -146,7 +148,8 @@ fn test_overdue_filter_pipeline() {
             due: None,
             overdue: false,
             start: None,
-            scheduled: None
+            scheduled: None,
+            priority: Priority::None
         },
     ];
 
@@ -163,3 +166,32 @@ fn test_overdue_filter_pipeline() {
     assert!(filtered_tasks.iter().all(|&task| !task.overdue), "All filtered tasks should not be overdue");
 }
 
+#[test]
+fn test_task_priorities() {
+    // Example task descriptions with various priority signifiers
+    let tasks_data = vec![
+        ("Do something important 🔺", Priority::Highest),
+        ("Do something else ⏫", Priority::High),
+        ("Regular task 🔼", Priority::Medium),
+        ("Maybe do this sometime 🔽", Priority::Low),
+        ("Not important ⏬", Priority::Lowest),
+        ("An ordinary task", Priority::None), // No signifier indicates no specific priority
+    ];
+
+    // Iterate over the task descriptions and their expected priorities
+    for (description, expected_priority) in tasks_data {
+        let d = description.to_string();
+        let task = Task {
+            name: d,
+            completed: false,
+            due: Some(NaiveDate::from_ymd(2022, 1, 1)), // Dummy date
+            overdue: false,
+            scheduled: None,
+            start: None,
+            priority: parse_priority(description).1,
+        };
+
+        // Assert that the parsed priority matches the expected priority
+        assert_eq!(task.priority, expected_priority, "Priority did not match for task description: {}", description);
+    }
+}

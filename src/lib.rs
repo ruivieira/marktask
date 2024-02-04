@@ -1,6 +1,6 @@
 
 use regex::Regex;
-use serde::{Serialize};
+use serde::{Serialize, Deserialize};
 use chrono::{NaiveDate, Local};
 
 mod serializers {
@@ -89,6 +89,16 @@ impl FilterPipeline {
     }
 }
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub enum Priority {
+    Highest,
+    High,
+    Medium,
+    Low,
+    Lowest,
+    None, // Represents no specific priority
+}
+
 
 #[derive(Serialize)]
 pub struct Task {
@@ -101,6 +111,26 @@ pub struct Task {
     #[serde(serialize_with = "serializers::serialize", deserialize_with = "serializers::deserialize", skip_serializing_if = "Option::is_none")]
     pub start: Option<NaiveDate>,
     pub overdue: bool,
+    pub priority: Priority,
+}
+
+pub fn parse_priority(description: &str) -> (String, Priority) {
+    let (priority, signifier) = if description.contains("🔺") {
+        (Priority::Highest, "🔺")
+    } else if description.contains("⏫") {
+        (Priority::High, "⏫")
+    } else if description.contains("🔼") {
+        (Priority::Medium, "🔼")
+    } else if description.contains("🔽") {
+        (Priority::Low, "🔽")
+    } else if description.contains("⏬") {
+        (Priority::Lowest, "⏬")
+    } else {
+        (Priority::None, "")
+    };
+
+    let name = description.replace(signifier, "").trim().to_string();
+    (name, priority)
 }
 
 /// Parses the input text into a vector of `Task` objects.
@@ -127,7 +157,16 @@ pub fn parse_input(input: &str) -> Vec<Task> {
 
             let overdue = due.map_or(false, |due_date| due_date < Local::today().naive_local());
 
-            Task { name: name_with_potential_dates.trim().to_string(), completed, due, scheduled, start, overdue }
+            let priority = parse_priority(&name_with_potential_dates);
+
+            Task { name: name_with_potential_dates.trim().to_string(),
+                completed,
+                due,
+                scheduled,
+                start,
+                overdue,
+                priority: priority.1
+            }
         })
     }).collect()
 }
