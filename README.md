@@ -1,4 +1,4 @@
-[![Rust](https://github.com/ruivieira/marktask/actions/workflows/rust.yaml/badge.svg)](https://github.com/ruivieira/marktask/actions/workflows/rust.yaml)
+[![Rust](https://github.com/ruivieira/marktask/actions/workflows/rust.yaml/badge.svg)](https://github.com/ruivieira/marktask/actions/workflows/rust.yaml) [![](https://img.shields.io/crates/v/marktask.svg)](https://crates.io/crates/marktask)
 # marktask
 
 `marktask` is a command-line interface (CLI) application designed for parsing and manipulating Markdown tasks.
