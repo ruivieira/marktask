@@ -52,21 +52,31 @@ fn test_tasks_details() {
     path.push("tests/data/task_dates.txt");
 
     let input = fs::read_to_string(path)
-        .expect("Failed to read tasks.txt");
+        .expect("Failed to read task_dates.txt");
 
     let tasks = parse_input(&input);
 
     let expected_details = vec![
-        ("This a task with no due data", None),
-        ("This is another one, but with a due date", Some(NaiveDate::from_ymd(2025, 7, 14))),
-        ("This one is overdue", Some(NaiveDate::from_ymd(2021, 7, 14))),
-        ("This one has an invalid due date", None), // Assuming your parsing correctly handles invalid dates
+        ("This a task with no due data", None, None),
+        ("This is another one, but with a due date", Some(NaiveDate::from_ymd(2025, 7, 14)), None),
+        ("This one is overdue", Some(NaiveDate::from_ymd(2021, 7, 14)), None),
+        ("This one has an invalid due date", None, None),
+        ("This has both a due and scheduled date", Some(NaiveDate::from_ymd(2025, 7, 14)), Some(NaiveDate::from_ymd(2025, 7, 14))),
+        ("This has a wrong scheduled date", Some(NaiveDate::from_ymd(2025, 7, 14)), None),
+        ("This has a both dates wrong", None, None),
+        ("This has just the due date wrong", None, Some(NaiveDate::from_ymd(2025, 7, 14))),
+        ("This one has just a scheduled date (but wrong)", None, None),
+        ("This one has just a scheduled date", None, Some(NaiveDate::from_ymd(2025, 7, 14))),
     ];
 
-    // Compare each task's name and due date with the expected values
+    // Assert the number of parsed tasks matches the expected number
     assert_eq!(tasks.len(), expected_details.len(), "Number of parsed tasks does not match expected number");
-    for (task, &(expected_name, expected_due)) in tasks.iter().zip(expected_details.iter()) {
+
+    // Compare each task's name, due date, and scheduled date with the expected values
+    for (task, &(expected_name, expected_due, expected_scheduled)) in tasks.iter().zip(expected_details.iter()) {
         assert_eq!(task.name, expected_name, "Task name does not match expected value");
         assert_eq!(task.due, expected_due, "Task due date does not match expected value");
+        assert_eq!(task.scheduled, expected_scheduled, "Task scheduled date does not match expected value");
     }
 }
+

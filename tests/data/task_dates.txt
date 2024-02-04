@@ -2,3 +2,9 @@
    - [ ] This is another one, but with a due date 📅 2025-07-14
    - [ ] This one is overdue 📅 2021-07-14
 - [ ] This one has an invalid due date 📅 9999-12-99
+- [ ] This has both a due and scheduled date 📅 2025-07-14 ⏳ 2025-07-14
+  - [ ]  This has a wrong scheduled date 📅 2025-07-14 ⏳ 9999-99-99
+        - [ ] This has a both dates wrong 📅 9999-99-99 ⏳ 9999-99-99
+        - [ ] This has just the due date wrong 📅 9999-99-99 ⏳ 2025-07-14
+- [ ] This one has just a scheduled date (but wrong) ⏳ 9999-99-99
+- [ ] This one has just a scheduled date ⏳ 2025-07-14
