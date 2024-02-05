@@ -22,8 +22,7 @@ mv target/release/marktask /usr/local/bin
 
 ## Usage
 
-`marktask` can be used with pipes and with other commands in a shell environment. 
-Below are some examples to get you started:
+`marktask` can be used with pipes and with other commands in a shell environment. Below are some examples to get you started:
 
 ### Display Tasks from a File
 
@@ -50,8 +49,7 @@ cat tasks.md | marktask --json
 
 ### Filter Overdue Tasks
 
-To exclude overdue tasks from the output, use the `--overdue=false` option. 
-By default, all tasks, including overdue ones, are shown:
+To exclude overdue tasks from the output, use the `--overdue=false` option. By default, all tasks, including overdue ones, are shown:
 
 ```sh
 cat tasks.md | marktask --overdue=false
@@ -59,25 +57,26 @@ cat tasks.md | marktask --overdue=false
 
 ### Filter Tasks by Date Range
 
-To include tasks starting from a specific date:
+To include tasks starting from a specific date or from a relative date like one week from today:
 
 ```sh
 cat tasks.md | marktask --from 2024-01-01
+cat tasks.md | marktask --from +1w  # Tasks starting from one week from today
 ```
 
-To include tasks up to a specific date:
+To include tasks up to a specific date or up to a relative period like two days from now:
 
 ```sh
 cat tasks.md | marktask --to 2024-01-31
+cat tasks.md | marktask --to +2d  # Tasks up to two days from today
 ```
 
-To include tasks within a specific date range:
+To include tasks within a specific date range or within a relative period:
 
 ```sh
 cat tasks.md | marktask --from 2024-01-01 --to 2024-01-31
+cat tasks.md | marktask --from -1w --to +1m  # Tasks from last week to one month from today
 ```
-
-This filters tasks to include only those that fall within the specified date range.
 
 ## License
 
