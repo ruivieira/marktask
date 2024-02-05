@@ -114,6 +114,11 @@ pub struct Task {
     pub priority: Priority,
 }
 
+fn clean_description(description: &str) -> String {
+    let re = Regex::new(r"\s+").unwrap(); // Matches one or more whitespace characters
+    re.replace_all(description.trim(), " ").to_string()
+}
+
 pub fn parse_priority(description: &str) -> (String, Priority) {
     let (priority, signifier) = if description.contains("🔺") {
         (Priority::Highest, "🔺")
@@ -129,9 +134,16 @@ pub fn parse_priority(description: &str) -> (String, Priority) {
         (Priority::None, "")
     };
 
-    let name = description.replace(signifier, "").trim().to_string();
-    (name, priority)
+    // Remove the signifier from the description to clean it up
+    let clean_description = if !signifier.is_empty() {
+        description.replace(signifier, "").trim().to_string()
+    } else {
+        description.to_string()
+    };
+
+    (clean_description, priority)
 }
+
 
 /// Parses the input text into a vector of `Task` objects.
 pub fn parse_input(input: &str) -> Vec<Task> {
@@ -157,15 +169,18 @@ pub fn parse_input(input: &str) -> Vec<Task> {
 
             let overdue = due.map_or(false, |due_date| due_date < Local::today().naive_local());
 
-            let priority = parse_priority(&name_with_potential_dates);
+            let (description_without_priorities, priority) = parse_priority(&name_with_potential_dates);
 
-            Task { name: name_with_potential_dates.trim().to_string(),
+            // Clean up the remaining description
+            let cleaned_description = clean_description(&description_without_priorities);
+
+            Task { name: cleaned_description,
                 completed,
                 due,
                 scheduled,
                 start,
                 overdue,
-                priority: priority.1
+                priority: priority
             }
         })
     }).collect()
