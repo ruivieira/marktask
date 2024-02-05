@@ -1,6 +1,6 @@
 use std::fs;
 use std::path::PathBuf;
-use marktask::{FilterPipeline, OverdueFilter, parse_input, parse_priority, Priority};
+use marktask::{parse_input, parse_priority, DateRangeFilter, FilterPipeline, OverdueFilter, Priority};
 use marktask::Task;
 use chrono::{NaiveDate, Local, Duration};
 
@@ -195,3 +195,65 @@ fn test_task_priorities() {
         assert_eq!(task.priority, expected_priority, "Priority did not match for task description: {}", description);
     }
 }
+
+#[test]
+fn test_date_range_filtering() {
+    // Define a set of tasks with various due dates
+    let base_date = NaiveDate::from_ymd(2024, 1, 1);
+    let tasks = vec![
+        Task {
+            name: "Task 1".to_string(),
+            completed: false,
+            due: Some(base_date),
+            overdue: true,
+            scheduled: None,
+            start: None,
+            priority: Priority::None,
+        },
+        Task {
+            name: "Task 2".to_string(),
+            completed: false,
+            due: Some(base_date + Duration::days(5)),
+            overdue: true,
+            scheduled: None,
+            start: None,
+            priority: Priority::None,
+        },
+        Task {
+            name: "Task 3".to_string(),
+            completed: false,
+            due: Some(base_date + Duration::days(10)),
+            overdue: true,
+            scheduled: None,
+            start: None,
+            priority: Priority::None,
+        },
+        Task {
+            name: "Task without date".to_string(),
+            completed: false,
+            due: None,
+            overdue: false,
+            scheduled: None,
+            start: None,
+            priority: Priority::None,
+        },
+    ];
+
+    // Define test cases
+    let test_cases = vec![
+        (Some(base_date), Some(base_date + Duration::days(10)), 3, "Both 'from' and 'to' specified"),
+        (Some(base_date + Duration::days(5)), None, 2, "'From' specified only"),
+        (None, Some(base_date + Duration::days(5)), 2, "'To' specified only"),
+        (None, None, 4, "Neither 'from' nor 'to' specified"),
+    ];
+
+    for (from_date, to_date, expected_count, case_description) in test_cases {
+        let mut pipeline = FilterPipeline::new();
+        pipeline.add_filter(Box::new(DateRangeFilter { from_date, to_date }));
+
+        let filtered_tasks = pipeline.apply(tasks.iter().collect());
+        
+        assert_eq!(filtered_tasks.len(), expected_count, "Case '{}': Expected {} tasks, found {}", case_description, expected_count, filtered_tasks.len());
+    }
+}
+

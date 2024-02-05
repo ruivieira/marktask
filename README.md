@@ -11,6 +11,7 @@ It allows users to filter, extract, and transform task information seamlessly wi
 - Filter tasks based on completion status.
 - Filter out or include overdue tasks with the `--overdue` option.
 - Output tasks in plain text or JSON format for easy consumption by other tools.
+- Filter tasks within a specific date range using `--from` and `--to` options.
 
 ## Installation
 
@@ -55,6 +56,28 @@ By default, all tasks, including overdue ones, are shown:
 ```sh
 cat tasks.md | marktask --overdue=false
 ```
+
+### Filter Tasks by Date Range
+
+To include tasks starting from a specific date:
+
+```sh
+cat tasks.md | marktask --from 2024-01-01
+```
+
+To include tasks up to a specific date:
+
+```sh
+cat tasks.md | marktask --to 2024-01-31
+```
+
+To include tasks within a specific date range:
+
+```sh
+cat tasks.md | marktask --from 2024-01-01 --to 2024-01-31
+```
+
+This filters tasks to include only those that fall within the specified date range.
 
 ## License
 
