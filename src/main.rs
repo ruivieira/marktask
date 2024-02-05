@@ -1,8 +1,8 @@
-use chrono::NaiveDate;
 use clap::{App, Arg};
 use marktask::{parse_input, DateRangeFilter, FilterPipeline, OverdueFilter, Task};
 use serde_json;
 use std::io::{self, Read};
+pub mod dates;
 
 fn main() {
     let matches = App::new("marktask")
@@ -38,13 +38,8 @@ fn main() {
     let tasks = parse_input(&input);
     let task_refs: Vec<&Task> = tasks.iter().collect();
 
-    let from_date = matches
-        .value_of("from")
-        .and_then(|d| NaiveDate::parse_from_str(d, "%Y-%m-%d").ok());
-
-    let to_date = matches
-        .value_of("to")
-        .and_then(|d| NaiveDate::parse_from_str(d, "%Y-%m-%d").ok());
+    let from_date = dates::parse_date_arg(matches.value_of("from"));
+    let to_date = dates::parse_date_arg(matches.value_of("to"));
 
     // Initialize the filter pipeline
     let mut pipeline = FilterPipeline::new();
